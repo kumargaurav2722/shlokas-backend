@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+python-jose
+passlib[bcrypt]
+bcrypt==3.2.2
+pydantic
+python-dotenv
+requests
+numpy
+sentence-transformers
+TTS
+beautifulsoup4
+Pillow
+reportlab
+google-auth

@@ -1,0 +1,11 @@
+
+# Added by antigravity
+venv/
+.env
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+audio/
+data/
+translation_pipeline.log

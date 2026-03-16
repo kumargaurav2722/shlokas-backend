@@ -6,6 +6,7 @@ python-jose
 passlib[bcrypt]
 bcrypt==3.2.2
 pydantic
+email-validator
 python-dotenv
 requests
 numpy

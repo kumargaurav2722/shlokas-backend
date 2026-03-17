@@ -48,12 +48,7 @@ from app.routes import (
     analytics as analytics_route,
 )
 
-# 🔥 CREATE TABLES (skip errors for existing tables with schema mismatches)
-try:
-    Base.metadata.create_all(bind=engine)
-except Exception as _table_err:
-    import logging
-    logging.getLogger(__name__).warning("Table creation skipped (tables likely exist): %s", _table_err)
+# Table creation is handled offline via Alembic or scripts, avoiding startup hangs.
 
 app = FastAPI(
     title="Shlokas Platform API",

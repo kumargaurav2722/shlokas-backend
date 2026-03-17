@@ -1,22 +1,20 @@
 import hashlib
 import math
 import os
-from typing import List, Optional
-
-from sentence_transformers import SentenceTransformer
+from typing import List, Optional, Any
 
 _MODEL_NAME = "all-MiniLM-L6-v2"
-_model: Optional[SentenceTransformer] = None
+_model: Optional[Any] = None
 _model_error: Optional[Exception] = None
 
-
-def _get_model() -> Optional[SentenceTransformer]:
+def _get_model() -> Optional[Any]:
     global _model, _model_error
     if os.getenv("EMBEDDINGS_FORCE_FALLBACK") == "1":
         return None
     if _model is not None or _model_error is not None:
         return _model
     try:
+        from sentence_transformers import SentenceTransformer
         _model = SentenceTransformer(_MODEL_NAME)
     except Exception as exc:
         _model_error = exc

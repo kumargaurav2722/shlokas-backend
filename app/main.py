@@ -1,14 +1,14 @@
+from dotenv import load_dotenv
+# Load environment variables FIRST, before any app modules read them
+load_dotenv()
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
 import time
-from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.database import Base, engine
-
-# Load environment variables from .env for local development
-load_dotenv()
 
 # ✅ IMPORT ALL MODELS (CRITICAL)
 from app.models import (

@@ -155,3 +155,34 @@ def root():
             "ask-the-gita"
         ]
     }
+
+
+@app.get("/debug/db")
+def debug_db():
+    """Temporary diagnostic endpoint to check DB connectivity."""
+    import traceback
+    from sqlalchemy import text as sql_text
+    from app.database import SessionLocal, DATABASE_URL
+    result = {"db_host": DATABASE_URL.split("@")[-1].split("/")[0] if "@" in DATABASE_URL else "localhost"}
+    try:
+        db = SessionLocal()
+        # Check connection
+        db.execute(sql_text("SELECT 1"))
+        result["connection"] = "OK"
+        # List tables
+        tables = db.execute(sql_text(
+            "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
+        )).fetchall()
+        result["tables"] = [t[0] for t in tables]
+        # Count texts
+        try:
+            count = db.execute(sql_text("SELECT COUNT(*) FROM texts")).scalar()
+            result["text_count"] = count
+        except Exception as e:
+            result["text_count_error"] = str(e)
+        db.close()
+    except Exception as e:
+        result["error"] = str(e)
+        result["traceback"] = traceback.format_exc()
+    return result
+

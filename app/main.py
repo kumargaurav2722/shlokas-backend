@@ -48,7 +48,14 @@ from app.routes import (
     analytics as analytics_route,
 )
 
-# Table creation is handled offline via Alembic or scripts, avoiding startup hangs.
+# Create tables if they don't exist (safe now — database.py has connect_timeout=10)
+import logging as _logging
+_logger = _logging.getLogger(__name__)
+try:
+    Base.metadata.create_all(bind=engine)
+    _logger.info("Database tables verified/created.")
+except Exception as _table_err:
+    _logger.warning("Table creation failed (will retry on first request): %s", _table_err)
 
 app = FastAPI(
     title="Shlokas Platform API",
@@ -88,19 +95,26 @@ import os as _os
 _frontend_url = _os.environ.get("FRONTEND_URL", "http://localhost:5173")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        _frontend_url,
-        "*",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+# Ensure CORS headers are present even on unhandled 500 errors
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    _logger.error("Unhandled error on %s %s: %s", request.method, request.url.path, exc)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+        },
+    )
 
 # 🔌 ROUTES
 app.include_router(auth.router)

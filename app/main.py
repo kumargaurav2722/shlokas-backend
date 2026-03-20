@@ -48,14 +48,19 @@ from app.routes import (
     analytics as analytics_route,
 )
 
-# Create tables if they don't exist (safe now — database.py has connect_timeout=10)
+# Create tables in a background thread so it never blocks startup/port binding
 import logging as _logging
+import threading as _threading
 _logger = _logging.getLogger(__name__)
-try:
-    Base.metadata.create_all(bind=engine)
-    _logger.info("Database tables verified/created.")
-except Exception as _table_err:
-    _logger.warning("Table creation failed (will retry on first request): %s", _table_err)
+
+def _background_create_tables():
+    try:
+        Base.metadata.create_all(bind=engine)
+        _logger.info("Database tables verified/created successfully.")
+    except Exception as exc:
+        _logger.warning("Background table creation failed: %s", exc)
+
+_threading.Thread(target=_background_create_tables, daemon=True).start()
 
 app = FastAPI(
     title="Shlokas Platform API",
@@ -108,7 +113,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     _logger.error("Unhandled error on %s %s: %s", request.method, request.url.path, exc)
     return JSONResponse(
         status_code=500,
-        content={"detail": "Internal server error"},
+        content={"detail": str(exc)},
         headers={
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "*",
@@ -159,30 +164,43 @@ def root():
 
 @app.get("/debug/db")
 def debug_db():
-    """Temporary diagnostic endpoint to check DB connectivity."""
+    """Diagnostic endpoint — tests DB with raw psycopg2 (bypasses SQLAlchemy pool)."""
     import traceback
-    from sqlalchemy import text as sql_text
-    from app.database import SessionLocal, DATABASE_URL
-    result = {"db_host": DATABASE_URL.split("@")[-1].split("/")[0] if "@" in DATABASE_URL else "localhost"}
+    from app.database import DATABASE_URL
+    result = {
+        "db_url_masked": DATABASE_URL.split("@")[-1].split("?")[0] if "@" in DATABASE_URL else "localhost",
+        "db_url_starts_with": DATABASE_URL[:25],
+    }
+    # Try raw psycopg2 connection with explicit timeout
     try:
-        db = SessionLocal()
-        # Check connection
-        db.execute(sql_text("SELECT 1"))
-        result["connection"] = "OK"
-        # List tables
-        tables = db.execute(sql_text(
-            "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
-        )).fetchall()
-        result["tables"] = [t[0] for t in tables]
-        # Count texts
+        import psycopg2
+        conn = psycopg2.connect(DATABASE_URL, connect_timeout=5)
+        cur = conn.cursor()
+        cur.execute("SELECT 1")
+        result["raw_connection"] = "OK"
+        cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
+        result["tables"] = [r[0] for r in cur.fetchall()]
         try:
-            count = db.execute(sql_text("SELECT COUNT(*) FROM texts")).scalar()
-            result["text_count"] = count
+            cur.execute("SELECT COUNT(*) FROM texts")
+            result["text_count"] = cur.fetchone()[0]
         except Exception as e:
             result["text_count_error"] = str(e)
+            conn.rollback()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        result["raw_error"] = str(e)
+        result["raw_traceback"] = traceback.format_exc()
+    # Also try SQLAlchemy
+    try:
+        from sqlalchemy import text as sql_text
+        from app.database import SessionLocal
+        db = SessionLocal()
+        db.execute(sql_text("SELECT 1"))
+        result["sqlalchemy_connection"] = "OK"
         db.close()
     except Exception as e:
-        result["error"] = str(e)
-        result["traceback"] = traceback.format_exc()
+        result["sqlalchemy_error"] = str(e)
     return result
+
 

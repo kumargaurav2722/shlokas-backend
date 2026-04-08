@@ -39,6 +39,7 @@ from app.database import SessionLocal
 from app.models.text import Text
 from app.models.translation import Translation
 from app.models.audio import Audio
+from app.storage import r2_storage
 from sqlalchemy import func
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -191,23 +192,49 @@ def run_pipeline(
 
         logger.info("🎵 Starting audio generation...")
 
+        use_r2 = r2_storage.is_configured()
+        if use_r2:
+            logger.info("☁️  R2 storage enabled — uploading to Cloudflare R2")
+        else:
+            logger.info("💾 R2 not configured — saving to local disk")
+
         for i, v in enumerate(verses):
             # Build filename: work_subwork_ch_v.mp3
             safe_work = v["work"].replace(" ", "_").lower()[:20]
             safe_sub = (v["sub_work"] or "").replace(" ", "_").lower()[:20]
             filename = f"{safe_work}_{safe_sub}_ch{v['chapter']}_v{v['verse']}.mp3"
             filepath = os.path.join(AUDIO_DIR, filename)
-            audio_url = f"audio/hindi/{filename}"
+            r2_key = f"audio/hindi/{filename}"
 
-            # Skip if file already exists
-            if os.path.exists(filepath):
-                if save_audio_record(db, v["id"], audio_url):
-                    total_generated += 1
-                continue
+            # Determine the path/URL to store in DB
+            if use_r2:
+                # Check if already uploaded to R2
+                if r2_storage.file_exists(r2_key):
+                    audio_url = r2_storage.get_public_url(r2_key)
+                    if save_audio_record(db, v["id"], audio_url):
+                        total_generated += 1
+                    continue
+            else:
+                audio_url = f"audio/hindi/{filename}"
+                # Skip if file already exists locally
+                if os.path.exists(filepath):
+                    if save_audio_record(db, v["id"], audio_url):
+                        total_generated += 1
+                    continue
 
-            # Generate
+            # Generate MP3 locally
             success = generate_audio_sync(v["hindi_text"], filepath)
             if success:
+                if use_r2:
+                    # Upload to R2 and store the public URL
+                    try:
+                        audio_url = r2_storage.upload_file(filepath, r2_key)
+                        os.remove(filepath)  # Clean up local temp file
+                    except Exception as exc:
+                        logger.warning("R2 upload failed for %s: %s", r2_key, exc)
+                        total_failed += 1
+                        continue
+
                 if save_audio_record(db, v["id"], audio_url):
                     total_generated += 1
                 else:

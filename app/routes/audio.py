@@ -72,9 +72,16 @@ def get_audio_file(
 
     path = existing.audio_path
 
+    # If audio is stored on R2/CDN, redirect to the public URL
+    if path.startswith("http"):
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(url=path, status_code=302)
+
+    # Local file fallback (development)
     if not os.path.exists(path):
         raise HTTPException(404, "Audio file missing on server")
 
     media_type, _ = mimetypes.guess_type(path)
     headers = {"Cache-Control": "public, max-age=31536000, immutable"}
     return FileResponse(path, media_type=media_type or "audio/mpeg", headers=headers)
+

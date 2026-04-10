@@ -27,7 +27,7 @@ class TopicItem(Base):
         nullable=False,
     )
     text_id = Column(
-        UUID(as_uuid=True),
+        String,
         ForeignKey("texts.id", ondelete="CASCADE"),
         nullable=False,
     )

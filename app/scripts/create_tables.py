@@ -8,6 +8,11 @@ from app.models import (
     embedding,
     chalisa,
     puja_vidhi,
+    bookmark,
+    history,
+    topic,
+    text_stats,
+    analytics,
 )
 
 

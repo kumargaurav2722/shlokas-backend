@@ -14,7 +14,15 @@ DATABASE_URL = os.getenv(
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-logger.info("Database URL host: %s", DATABASE_URL.split("@")[-1].split("/")[0] if "@" in DATABASE_URL else "localhost")
+# Detect if this is a remote DB (Neon, Render Postgres, etc.)
+_is_remote = "@" in DATABASE_URL and "localhost" not in DATABASE_URL and "127.0.0.1" not in DATABASE_URL
+
+logger.info("Database URL host: %s (remote=%s)", DATABASE_URL.split("@")[-1].split("/")[0] if "@" in DATABASE_URL else "localhost", _is_remote)
+
+# Build connect_args — Neon requires sslmode=require
+_connect_args = {"connect_timeout": 10}
+if _is_remote:
+    _connect_args["sslmode"] = "require"
 
 engine = create_engine(
     DATABASE_URL,
@@ -22,8 +30,8 @@ engine = create_engine(
     pool_pre_ping=True,
     pool_size=5,
     max_overflow=10,
-    pool_timeout=10,
-    connect_args={"connect_timeout": 10},
+    pool_timeout=30,
+    connect_args=_connect_args,
 )
 
 SessionLocal = sessionmaker(

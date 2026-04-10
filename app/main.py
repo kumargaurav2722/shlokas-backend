@@ -8,7 +8,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 import time
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.database import Base, engine
+from app.database import Base, engine, SessionLocal
 
 # ✅ IMPORT ALL MODELS (CRITICAL)
 from app.models import (
@@ -48,19 +48,17 @@ from app.routes import (
     analytics as analytics_route,
 )
 
-# Create tables in a background thread so it never blocks startup/port binding
+# Create tables synchronously so they exist before any request
 import logging as _logging
-import threading as _threading
 _logger = _logging.getLogger(__name__)
 
-def _background_create_tables():
-    try:
-        Base.metadata.create_all(bind=engine)
-        _logger.info("Database tables verified/created successfully.")
-    except Exception as exc:
-        _logger.warning("Background table creation failed: %s", exc)
-
-_threading.Thread(target=_background_create_tables, daemon=True).start()
+_db_ready = False
+try:
+    Base.metadata.create_all(bind=engine)
+    _db_ready = True
+    _logger.info("Database tables verified/created successfully.")
+except Exception as exc:
+    _logger.error("Table creation failed (app will still start): %s", exc)
 
 app = FastAPI(
     title="Shlokas Platform API",
@@ -204,3 +202,18 @@ def debug_db():
     return result
 
 
+@app.get("/health")
+def health():
+    """Quick health check — tests SQLAlchemy pool connection."""
+    try:
+        from sqlalchemy import text as sql_text
+        db = SessionLocal()
+        db.execute(sql_text("SELECT 1"))
+        db.close()
+        return {"status": "healthy", "db": "connected", "tables_created": _db_ready}
+    except Exception as e:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=503,
+            content={"status": "unhealthy", "db": str(e), "tables_created": _db_ready}
+        )

@@ -96,6 +96,8 @@ def get_sub_works(
     response: Response = None,
     db: Session = Depends(get_db)
 ):
+    import logging
+    logger = logging.getLogger(__name__)
     category = _normalize_category(category)
     cache_key = f"subworks:{category or ''}:{work}"
     cached = _cache_get(cache_key)
@@ -103,15 +105,24 @@ def get_sub_works(
         if response:
             _set_cache_headers(response)
         return cached
-    query = db.query(Text.sub_work).filter(Text.work == work)
-    if category:
-        query = query.filter(Text.category == category)
-    rows = query.distinct().all()
-    payload = [r[0] for r in rows]
-    _cache_set(cache_key, payload)
-    if response:
-        _set_cache_headers(response)
-    return payload
+    try:
+        query = db.query(Text.sub_work).filter(Text.work == work)
+        if category:
+            query = query.filter(Text.category == category)
+        rows = query.distinct().all()
+        payload = [r[0] for r in rows]
+        _cache_set(cache_key, payload)
+        if response:
+            _set_cache_headers(response)
+        return payload
+    except Exception as e:
+        logger.error("Error in /texts/sub-works (work=%s, category=%s): %s", work, category, e)
+        db.rollback()
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Database error: {str(e)}"}
+        )
 
 
 @router.get("/sub-work-stats")

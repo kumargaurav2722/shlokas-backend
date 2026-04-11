@@ -48,21 +48,35 @@ from app.routes import (
     analytics as analytics_route,
 )
 
-# Create tables synchronously so they exist before any request
 import logging as _logging
 _logger = _logging.getLogger(__name__)
 
-_db_ready = False
-try:
-    Base.metadata.create_all(bind=engine)
-    _db_ready = True
-    _logger.info("Database tables verified/created successfully.")
-except Exception as exc:
-    _logger.error("Table creation failed (app will still start): %s", exc)
+_db_ready = True
+
+
+from contextlib import asynccontextmanager
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from fastapi_cache.backends.inmemory import InMemoryBackend
+from redis import asyncio as aioredis
+import os
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    redis_url = os.getenv("REDIS_URL")
+    if redis_url:
+        redis = aioredis.from_url(redis_url, encoding="utf8", decode_responses=False)
+        FastAPICache.init(RedisBackend(redis), prefix="shlokas-cache")
+        _logger.info("FastAPICache initialized with Redis")
+    else:
+        FastAPICache.init(InMemoryBackend(), prefix="shlokas-cache")
+        _logger.info("FastAPICache initialized with InMemory fallback")
+    yield
 
 app = FastAPI(
     title="Shlokas Platform API",
-    version="1.0"
+    version="1.0",
+    lifespan=lifespan
 )
 
 # Simple in-memory rate limiting

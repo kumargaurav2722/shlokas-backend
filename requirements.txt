@@ -17,3 +17,8 @@ Pillow
 reportlab
 google-auth
 boto3
+
+redis
+fastapi-cache2[redis]
+uvloop>=0.22.1
+httptools>=0.7.1

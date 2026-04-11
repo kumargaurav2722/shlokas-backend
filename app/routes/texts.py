@@ -5,28 +5,7 @@ from app.database import SessionLocal
 from app.models.text import Text
 from app.models.translation import Translation
 from app.models.text_stats import TextStats
-import time
-
-_CACHE = {}
-_CACHE_TTL = 300
-
-
-def _cache_get(key):
-    entry = _CACHE.get(key)
-    if not entry:
-        return None
-    if time.time() - entry["ts"] > _CACHE_TTL:
-        _CACHE.pop(key, None)
-        return None
-    return entry["value"]
-
-
-def _cache_set(key, value):
-    _CACHE[key] = {"ts": time.time(), "value": value}
-
-
-def _set_cache_headers(response: Response):
-    response.headers["Cache-Control"] = f"public, max-age={_CACHE_TTL}"
+from fastapi_cache.decorator import cache
 
 # Normalize category names (frontend uses plural, DB uses singular)
 _CATEGORY_ALIASES = {
@@ -54,91 +33,43 @@ def get_db():
         db.close()
 
 @router.get("/categories")
-def get_categories(response: Response, db: Session = Depends(get_db)):
-    cache_key = "categories"
-    cached = _cache_get(cache_key)
-    if cached is not None:
-        _set_cache_headers(response)
-        return cached
+@cache(expire=3600)
+def get_categories(db: Session = Depends(get_db)):
     rows = db.query(Text.category).distinct().all()
-    payload = [r[0] for r in rows]
-    _cache_set(cache_key, payload)
-    _set_cache_headers(response)
-    return payload
-
+    return [r[0] for r in rows]
 
 @router.get("/works")
-def get_works(category: str | None = None, response: Response = None, db: Session = Depends(get_db)):
+@cache(expire=3600)
+def get_works(category: str | None = None, db: Session = Depends(get_db)):
     category = _normalize_category(category)
-    cache_key = f"works:{category or ''}"
-    cached = _cache_get(cache_key)
-    if cached is not None:
-        if response:
-            _set_cache_headers(response)
-        return cached
     query = db.query(Text.category, Text.work, Text.sub_work).distinct()
     if category:
         query = query.filter(Text.category == category)
     rows = query.all()
-    payload = [
-        {"category": r[0], "work": r[1], "sub_work": r[2]}
-        for r in rows
-    ]
-    _cache_set(cache_key, payload)
-    if response:
-        _set_cache_headers(response)
-    return payload
+    return [{"category": r[0], "work": r[1], "sub_work": r[2]} for r in rows]
 
 @router.get("/sub-works")
-def get_sub_works(
-    work: str,
-    category: str | None = None,
-    response: Response = None,
-    db: Session = Depends(get_db)
-):
+@cache(expire=3600)
+def get_sub_works(work: str, category: str | None = None, db: Session = Depends(get_db)):
     import logging
     logger = logging.getLogger(__name__)
     category = _normalize_category(category)
-    cache_key = f"subworks:{category or ''}:{work}"
-    cached = _cache_get(cache_key)
-    if cached is not None:
-        if response:
-            _set_cache_headers(response)
-        return cached
     try:
         query = db.query(Text.sub_work).filter(Text.work == work)
         if category:
             query = query.filter(Text.category == category)
         rows = query.distinct().all()
-        payload = [r[0] for r in rows]
-        _cache_set(cache_key, payload)
-        if response:
-            _set_cache_headers(response)
-        return payload
+        return [r[0] for r in rows]
     except Exception as e:
-        logger.error("Error in /texts/sub-works (work=%s, category=%s): %s", work, category, e)
+        logger.error("Error in /texts/sub-works: %s", e)
         db.rollback()
         from fastapi.responses import JSONResponse
-        return JSONResponse(
-            status_code=500,
-            content={"detail": f"Database error: {str(e)}"}
-        )
-
+        return JSONResponse(status_code=500, content={"detail": f"Database error: {str(e)}"})
 
 @router.get("/sub-work-stats")
-def get_sub_work_stats(
-    work: str,
-    category: str | None = None,
-    response: Response = None,
-    db: Session = Depends(get_db),
-):
+@cache(expire=3600)
+def get_sub_work_stats(work: str, category: str | None = None, db: Session = Depends(get_db)):
     category = _normalize_category(category)
-    cache_key = f"subworkstats:{category or ''}:{work}"
-    cached = _cache_get(cache_key)
-    if cached is not None:
-        if response:
-            _set_cache_headers(response)
-        return cached
     query = db.query(
         Text.sub_work.label("sub_work"),
         func.count(func.distinct(Text.chapter)).label("chapter_count"),
@@ -147,99 +78,45 @@ def get_sub_work_stats(
     if category:
         query = query.filter(Text.category == category)
     rows = query.group_by(Text.sub_work).all()
-    payload = [
-        {
-            "sub_work": r.sub_work,
-            "chapter_count": r.chapter_count,
-            "verse_count": r.verse_count,
-        }
+    return [
+        {"sub_work": r.sub_work, "chapter_count": r.chapter_count, "verse_count": r.verse_count}
         for r in rows
     ]
-    _cache_set(cache_key, payload)
-    if response:
-        _set_cache_headers(response)
-    return payload
 
 @router.get("/chapters")
-def get_chapters(
-    work: str,
-    sub_work: str,
-    category: str | None = None,
-    response: Response = None,
-    db: Session = Depends(get_db)
-):
+@cache(expire=3600)
+def get_chapters(work: str, sub_work: str, category: str | None = None, db: Session = Depends(get_db)):
     category = _normalize_category(category)
-    cache_key = f"chapters:{category or ''}:{work}:{sub_work}"
-    cached = _cache_get(cache_key)
-    if cached is not None:
-        if response:
-            _set_cache_headers(response)
-        return cached
-    query = db.query(Text.chapter).filter(
-        Text.work == work,
-        Text.sub_work == sub_work
-    )
+    query = db.query(Text.chapter).filter(Text.work == work, Text.sub_work == sub_work)
     if category:
         query = query.filter(Text.category == category)
     chapters = query.distinct().all()
-    payload = [c[0] for c in chapters]
-    _cache_set(cache_key, payload)
-    if response:
-        _set_cache_headers(response)
-    return payload
-
+    return [c[0] for c in chapters]
 
 @router.get("/chapter-stats")
-def get_chapter_stats(
-    work: str,
-    sub_work: str,
-    category: str | None = None,
-    response: Response = None,
-    db: Session = Depends(get_db),
-):
+@cache(expire=3600)
+def get_chapter_stats(work: str, sub_work: str, category: str | None = None, db: Session = Depends(get_db)):
     category = _normalize_category(category)
-    cache_key = f"chapterstats:{category or ''}:{work}:{sub_work}"
-    cached = _cache_get(cache_key)
-    if cached is not None:
-        if response:
-            _set_cache_headers(response)
-        return cached
     query = db.query(
         Text.chapter.label("chapter"),
         func.count(Text.id).label("verse_count"),
-    ).filter(
-        Text.work == work,
-        Text.sub_work == sub_work,
-    )
+    ).filter(Text.work == work, Text.sub_work == sub_work)
     if category:
         query = query.filter(Text.category == category)
     rows = query.group_by(Text.chapter).order_by(Text.chapter).all()
-    payload = [
-        {"chapter": r.chapter, "verse_count": r.verse_count}
-        for r in rows
-    ]
-    _cache_set(cache_key, payload)
-    if response:
-        _set_cache_headers(response)
-    return payload
+    return [{"chapter": r.chapter, "verse_count": r.verse_count} for r in rows]
 
 @router.get("/verses")
+@cache(expire=3600)
 def get_verses(
     work: str,
     sub_work: str,
     chapter: int,
     category: str | None = None,
     languages: str | None = None,
-    response: Response = None,
     db: Session = Depends(get_db)
 ):
     category = _normalize_category(category)
-    cache_key = f"verses:{category or ''}:{work}:{sub_work}:{chapter}:{languages or ''}"
-    cached = _cache_get(cache_key)
-    if cached is not None:
-        if response:
-            _set_cache_headers(response)
-        return cached
     query = db.query(Text).filter(
         Text.work == work,
         Text.sub_work == sub_work,
@@ -318,28 +195,18 @@ def get_verses(
         for lang, value in by_id.get(r.id, {}).items():
             entry[lang_key(lang)] = value
         payload.append(entry)
-    _cache_set(cache_key, payload)
-    if response:
-        _set_cache_headers(response)
     return payload
 
-
 @router.get("/verse-index")
+@cache(expire=3600)
 def get_verse_index(
     category: str | None = None,
     work: str | None = None,
     sub_work: str | None = None,
     limit: int | None = None,
     offset: int = 0,
-    response: Response = None,
     db: Session = Depends(get_db),
 ):
-    cache_key = f"verseindex:{category or ''}:{work or ''}:{sub_work or ''}:{limit}:{offset}"
-    cached = _cache_get(cache_key)
-    if cached is not None:
-        if response:
-            _set_cache_headers(response)
-        return cached
     query = db.query(
         Text.category,
         Text.work,
@@ -363,7 +230,7 @@ def get_verse_index(
     if limit is not None:
         query = query.limit(limit).offset(offset)
     rows = query.all()
-    payload = [
+    return [
         {
             "category": r[0],
             "work": r[1],
@@ -373,7 +240,3 @@ def get_verse_index(
         }
         for r in rows
     ]
-    _cache_set(cache_key, payload)
-    if response:
-        _set_cache_headers(response)
-    return payload

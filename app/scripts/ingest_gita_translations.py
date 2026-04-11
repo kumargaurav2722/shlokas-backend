@@ -56,6 +56,26 @@ def main() -> None:
         skipped = 0
         missing = 0
 
+        # Pre-fetch all text mappings for Gita
+        gita_texts = (
+            db.query(Text.id, Text.chapter, Text.verse)
+            .filter(
+                Text.category == "itihasa",
+                Text.work == "Mahabharata",
+                Text.sub_work == "Bhagavad Gita",
+            )
+            .all()
+        )
+        verse_map = {(t.chapter, t.verse): t.id for t in gita_texts}
+
+        # Pre-fetch existing translations
+        existing_translations = set(
+            r[0] for r in
+            db.query(Translation.text_id)
+            .filter(Translation.language == args.language)
+            .all()
+        )
+
         for path in iter_files(args.root):
             for item in load_items(path):
                 chapter = item.get("chapter")
@@ -64,30 +84,12 @@ def main() -> None:
                     skipped += 1
                     continue
 
-                text_row = (
-                    db.query(Text)
-                    .filter(
-                        Text.category == "itihasa",
-                        Text.work == "Mahabharata",
-                        Text.sub_work == "Bhagavad Gita",
-                        Text.chapter == chapter,
-                        Text.verse == verse,
-                    )
-                    .first()
-                )
-                if not text_row:
+                text_id = verse_map.get((chapter, verse))
+                if not text_id:
                     missing += 1
                     continue
 
-                existing = (
-                    db.query(Translation)
-                    .filter(
-                        Translation.text_id == text_row.id,
-                        Translation.language == args.language,
-                    )
-                    .first()
-                )
-                if existing:
+                if text_id in existing_translations:
                     skipped += 1
                     continue
 
@@ -97,14 +99,19 @@ def main() -> None:
                     continue
 
                 record = Translation(
-                    text_id=text_row.id,
+                    text_id=text_id,
                     language=args.language,
                     translation=translation_text,
                     commentary=None,
                     generated_by=args.source,
                 )
                 db.add(record)
+                existing_translations.add(text_id)
                 created += 1
+
+                # Commit in batches to avoid huge transactions
+                if created % 200 == 0:
+                    db.commit()
 
         if args.dry_run:
             db.rollback()

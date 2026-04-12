@@ -485,13 +485,23 @@ def run_pipeline(
                 logger.warning("   ❌ Batch %d failed (bad JSON)", batch_num)
                 continue
 
-            # Save to DB
-            saved, skipped = save_translations(db, parsed, model_name)
-            total_saved += saved
-            total_skipped += skipped
-
-            if saved > 0:
-                logger.info("   ✅ Saved %d translations", saved)
+            # Save to DB with retry logic for connection drops
+            for attempt in range(3):
+                try:
+                    saved, skipped = save_translations(db, parsed, model_name)
+                    total_saved += saved
+                    total_skipped += skipped
+                    if saved > 0:
+                        logger.info("   ✅ Saved %d translations", saved)
+                    break
+                except Exception as e:
+                    logger.warning("   ⚠️ DB attempt %d failed: %s", attempt + 1, e)
+                    db.close()
+                    time.sleep(5)
+                    db = SessionLocal()
+                    if attempt == 2:
+                        logger.error("   ❌ Batch %d failed after 3 DB retries", batch_num)
+                        total_failed += len(batch)
 
             # Rate limiting
             time.sleep(RATE_LIMIT_DELAY)

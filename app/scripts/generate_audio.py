@@ -40,7 +40,7 @@ from app.models.text import Text
 from app.models.translation import Translation
 from app.models.audio import Audio
 from app.storage import r2_storage
-from sqlalchemy import func
+from sqlalchemy import func, text
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -158,111 +158,150 @@ def run_pipeline(
     dry_run: bool = False,
     work: Optional[str] = None,
     limit: int = 0,
+    continuous: bool = False,
 ):
     """Run the Hindi audio generation pipeline."""
     os.makedirs(AUDIO_DIR, exist_ok=True)
 
-    db = SessionLocal()
+    while True:
+        # Step 1: Establish resilient DB session
+        db = None
+        for attempt in range(5):
+            try:
+                db = SessionLocal()
+                # Test connection
+                db.execute(text("SELECT 1"))
+                break
+            except Exception as e:
+                logger.warning("   📡 DB connection attempt %d failed (DNS/Network): %s. Retrying in 15s...", attempt + 1, e)
+                if db: db.close()
+                time.sleep(15)
+                if attempt == 4:
+                    logger.error("   ❌ Failed to connect to DB after 5 attempts.")
+                    return
 
-    try:
-        logger.info("🔍 Scanning for verses needing Hindi audio...")
-        verses = get_verses_needing_audio(db, work, limit)
+        try:
+            logger.info("🔍 Scanning for verses needing Hindi audio...")
+            verses = get_verses_needing_audio(db, work, limit)
 
-        if not verses:
-            logger.info("✅ All verses with Hindi translations have audio!")
-            return
+            if not verses:
+                logger.info("✅ All verses with Hindi translations have audio!")
+                if not continuous:
+                    return
+                else:
+                    db.close()
+                    logger.info("😴 Sleeping for 30s...")
+                    time.sleep(30)
+                    continue
 
-        # Stats
-        by_work = {}
-        for v in verses:
-            key = f"{v['category']}/{v['work']}"
-            by_work[key] = by_work.get(key, 0) + 1
+            # Stats
+            by_work = {}
+            for v in verses:
+                key = f"{v['category']}/{v['work']}"
+                by_work[key] = by_work.get(key, 0) + 1
 
-        logger.info("📊 Found %d verses needing audio:", len(verses))
-        for key, count in sorted(by_work.items()):
-            logger.info("   %s: %d", key, count)
+            logger.info("📊 Found %d verses needing audio:", len(verses))
+            for key, count in sorted(by_work.items()):
+                logger.info("   %s: %d", key, count)
 
-        if dry_run:
-            logger.info("🔍 DRY RUN — no audio will be generated.")
-            return
+            if dry_run:
+                logger.info("🔍 DRY RUN — no audio will be generated.")
+                if not continuous:
+                    return
+                else:
+                    db.close()
+                    time.sleep(30)
+                    continue
 
-        total_generated = 0
-        total_failed = 0
-        start_time = time.time()
+            total_generated = 0
+            total_failed = 0
+            start_time = time.time()
 
-        logger.info("🎵 Starting audio generation...")
+            logger.info("🎵 Starting audio generation...")
 
-        use_r2 = r2_storage.is_configured()
-        if use_r2:
-            logger.info("☁️  R2 storage enabled — uploading to Cloudflare R2")
-        else:
-            logger.info("💾 R2 not configured — saving to local disk")
-
-        for i, v in enumerate(verses):
-            # Build filename: work_subwork_ch_v.mp3
-            safe_work = v["work"].replace(" ", "_").lower()[:20]
-            safe_sub = (v["sub_work"] or "").replace(" ", "_").lower()[:20]
-            filename = f"{safe_work}_{safe_sub}_ch{v['chapter']}_v{v['verse']}.mp3"
-            filepath = os.path.join(AUDIO_DIR, filename)
-            r2_key = f"audio/hindi/{filename}"
-
-            # Determine the path/URL to store in DB
+            use_r2 = r2_storage.is_configured()
             if use_r2:
-                # Check if already uploaded to R2
-                if r2_storage.file_exists(r2_key):
-                    audio_url = r2_storage.get_public_url(r2_key)
-                    if save_audio_record(db, v["id"], audio_url):
-                        total_generated += 1
-                    continue
+                logger.info("☁️  R2 storage enabled — uploading to Cloudflare R2")
             else:
-                audio_url = f"audio/hindi/{filename}"
-                # Skip if file already exists locally
-                if os.path.exists(filepath):
-                    if save_audio_record(db, v["id"], audio_url):
-                        total_generated += 1
-                    continue
+                logger.info("💾 R2 not configured — saving to local disk")
 
-            # Generate MP3 locally
-            success = generate_audio_sync(v["hindi_text"], filepath)
-            if success:
+            for i, v in enumerate(verses):
+                # Build filename: work_subwork_ch_v.mp3
+                safe_work = v["work"].replace(" ", "_").lower()[:20]
+                safe_sub = (v["sub_work"] or "").replace(" ", "_").lower()[:20]
+                filename = f"{safe_work}_{safe_sub}_ch{v['chapter']}_v{v['verse']}.mp3"
+                filepath = os.path.join(AUDIO_DIR, filename)
+                r2_key = f"audio/hindi/{filename}"
+
+                # Determine the path/URL to store in DB
                 if use_r2:
-                    # Upload to R2 and store the public URL
-                    try:
-                        audio_url = r2_storage.upload_file(filepath, r2_key)
-                        os.remove(filepath)  # Clean up local temp file
-                    except Exception as exc:
-                        logger.warning("R2 upload failed for %s: %s", r2_key, exc)
-                        total_failed += 1
+                    # Check if already uploaded to R2
+                    if r2_storage.file_exists(r2_key):
+                        audio_url = r2_storage.get_public_url(r2_key)
+                        if save_audio_record(db, v["id"], audio_url):
+                            total_generated += 1
+                        continue
+                else:
+                    audio_url = f"audio/hindi/{filename}"
+                    # Skip if file already exists locally
+                    if os.path.exists(filepath):
+                        if save_audio_record(db, v["id"], audio_url):
+                            total_generated += 1
                         continue
 
-                if save_audio_record(db, v["id"], audio_url):
-                    total_generated += 1
+                # Generate MP3 locally
+                success = generate_audio_sync(v["hindi_text"], filepath)
+                if success:
+                    if use_r2:
+                        # Upload to R2 and store the public URL
+                        try:
+                            audio_url = r2_storage.upload_file(filepath, r2_key)
+                            os.remove(filepath)  # Clean up local temp file
+                        except Exception as exc:
+                            logger.warning("R2 upload failed for %s: %s", r2_key, exc)
+                            total_failed += 1
+                            continue
+
+                    if save_audio_record(db, v["id"], audio_url):
+                        total_generated += 1
+                    else:
+                        total_failed += 1
                 else:
                     total_failed += 1
-            else:
-                total_failed += 1
 
-            # Progress
-            if (i + 1) % 10 == 0 or i == len(verses) - 1:
-                elapsed = time.time() - start_time
-                rate = (i + 1) / max(elapsed, 1) * 60
-                eta = (len(verses) - i - 1) / max(rate, 0.1)
-                logger.info(
-                    "🎵 %d/%d | Generated: %d | Failed: %d | %.0f/min | ETA: %.0fm",
-                    i + 1, len(verses), total_generated, total_failed, rate, eta
-                )
+                # Progress
+                if (i + 1) % 10 == 0 or i == len(verses) - 1:
+                    elapsed = time.time() - start_time
+                    rate = (i + 1) / max(elapsed, 1) * 60
+                    eta = (len(verses) - i - 1) / max(rate, 0.1)
+                    logger.info(
+                        "🎵 %d/%d | Generated: %d | Failed: %d | %.0f/min | ETA: %.0fm",
+                        i + 1, len(verses), total_generated, total_failed, rate, eta
+                    )
 
-        elapsed_total = time.time() - start_time
-        logger.info("\n" + "=" * 60)
-        logger.info("✨ AUDIO GENERATION COMPLETE")
-        logger.info("   Total processed: %d", len(verses))
-        logger.info("   Audio generated: %d", total_generated)
-        logger.info("   Failed: %d", total_failed)
-        logger.info("   Time: %.1f minutes", elapsed_total / 60)
-        logger.info("=" * 60)
+            elapsed_total = time.time() - start_time
+            logger.info("\n" + "=" * 60)
+            logger.info("✨ AUDIO GENERATION COMPLETE")
+            logger.info("   Total processed: %d", len(verses))
+            logger.info("   Audio generated: %d", total_generated)
+            logger.info("   Failed: %d", total_failed)
+            logger.info("   Time: %.1f minutes", elapsed_total / 60)
+            logger.info("=" * 60)
 
-    finally:
-        db.close()
+        except Exception as pipeline_err:
+            logger.error("   ❌ Pipeline error encountered: %s", pipeline_err)
+        finally:
+            try:
+                if db:
+                    db.close()
+            except Exception as close_err:
+                logger.warning("   ⚠️ Error closing database session: %s", close_err)
+
+        if not continuous:
+            break
+        
+        logger.info("😴 No more verses to process. Sleeping for 30s...")
+        time.sleep(30)
 
 
 def main():
@@ -270,9 +309,10 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="Scan only")
     parser.add_argument("--work", type=str, help="Only this work")
     parser.add_argument("--limit", type=int, default=0, help="Max verses (0=all)")
+    parser.add_argument("--continuous", action="store_true", help="Poll continuously for new translations")
     args = parser.parse_args()
 
-    run_pipeline(dry_run=args.dry_run, work=args.work, limit=args.limit)
+    run_pipeline(dry_run=args.dry_run, work=args.work, limit=args.limit, continuous=args.continuous)
 
 
 if __name__ == "__main__":

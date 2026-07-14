@@ -1,0 +1,41 @@
+2026-07-15 01:19:25,209 INFO 🔍 Scanning for verses needing Hindi audio...
+2026-07-15 01:19:44,588 INFO 📊 Found 350 verses needing audio:
+2026-07-15 01:19:44,588 INFO    itihasa/Ramcharitmanas: 350
+2026-07-15 01:19:44,588 INFO 🎵 Starting audio generation...
+2026-07-15 01:19:44,588 INFO 💾 R2 not configured — saving to local disk
+2026-07-15 01:21:00,804 INFO 🎵 10/350 | Generated: 10 | Failed: 0 | 8/min | ETA: 43m
+2026-07-15 01:21:41,165 INFO 🎵 30/350 | Generated: 30 | Failed: 0 | 15/min | ETA: 21m
+2026-07-15 01:22:08,718 INFO 🎵 50/350 | Generated: 50 | Failed: 0 | 21/min | ETA: 14m
+2026-07-15 01:22:32,656 INFO 🎵 70/350 | Generated: 70 | Failed: 0 | 25/min | ETA: 11m
+2026-07-15 01:23:29,270 INFO 🎵 90/350 | Generated: 90 | Failed: 0 | 24/min | ETA: 11m
+2026-07-15 01:24:26,677 INFO 🎵 120/350 | Generated: 120 | Failed: 0 | 26/min | ETA: 9m
+2026-07-15 01:25:48,982 INFO 🎵 170/350 | Generated: 170 | Failed: 0 | 28/min | ETA: 6m
+2026-07-15 01:26:52,145 INFO 🎵 200/350 | Generated: 200 | Failed: 0 | 28/min | ETA: 5m
+2026-07-15 01:28:43,624 INFO 🎵 260/350 | Generated: 260 | Failed: 0 | 29/min | ETA: 3m
+2026-07-15 01:30:49,512 INFO 🎵 340/350 | Generated: 340 | Failed: 0 | 31/min | ETA: 0m
+2026-07-15 01:31:24,677 INFO 🎵 350/350 | Generated: 350 | Failed: 0 | 30/min | ETA: 0m
+2026-07-15 01:31:24,679 INFO 
+============================================================
+2026-07-15 01:31:24,679 INFO ✨ AUDIO GENERATION COMPLETE
+2026-07-15 01:31:24,679 INFO    Total processed: 350
+2026-07-15 01:31:24,680 INFO    Audio generated: 350
+2026-07-15 01:31:24,680 INFO    Failed: 0
+2026-07-15 01:31:24,680 INFO    Time: 11.7 minutes
+2026-07-15 01:31:24,680 INFO ============================================================
+2026-07-15 01:31:24,680 INFO 😴 No more verses to process. Sleeping for 30s...
+2026-07-15 01:31:55,583 INFO 🔍 Scanning for verses needing Hindi audio...
+2026-07-15 01:32:44,093 INFO 📊 Found 298 verses needing audio:
+2026-07-15 01:32:44,093 INFO    itihasa/Ramcharitmanas: 298
+2026-07-15 01:32:44,093 INFO 🎵 Starting audio generation...
+2026-07-15 01:32:44,093 INFO 💾 R2 not configured — saving to local disk
+2026-07-15 01:33:23,210 INFO 🎵 10/298 | Generated: 10 | Failed: 0 | 15/min | ETA: 19m
+2026-07-15 01:34:18,070 INFO 🎵 30/298 | Generated: 30 | Failed: 0 | 19/min | ETA: 14m
+2026-07-15 01:36:01,361 INFO 🎵 90/298 | Generated: 90 | Failed: 0 | 27/min | ETA: 8m
+2026-07-15 01:36:54,914 INFO 🎵 100/298 | Generated: 100 | Failed: 0 | 24/min | ETA: 8m
+2026-07-15 01:37:58,622 INFO 🎵 110/298 | Generated: 110 | Failed: 0 | 21/min | ETA: 9m
+2026-07-15 01:38:30,087 INFO 🎵 120/298 | Generated: 120 | Failed: 0 | 21/min | ETA: 9m
+2026-07-15 01:39:05,678 INFO 🎵 130/298 | Generated: 130 | Failed: 0 | 20/min | ETA: 8m
+2026-07-15 01:39:39,538 INFO 🎵 140/298 | Generated: 140 | Failed: 0 | 20/min | ETA: 8m
+2026-07-15 01:40:34,114 INFO 🎵 160/298 | Generated: 160 | Failed: 0 | 20/min | ETA: 7m
+2026-07-15 01:41:15,424 INFO 🎵 170/298 | Generated: 170 | Failed: 0 | 20/min | ETA: 6m
+2026-07-15 01:43:29,675 INFO 🎵 230/298 | Generated: 230 | Failed: 0 | 21/min | ETA: 3m

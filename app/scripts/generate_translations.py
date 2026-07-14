@@ -62,6 +62,8 @@ GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 # Rate limiting: Groq free tier = 30 req/min, we use 20 to be safe
 RATE_LIMIT_RPM = 20
 RATE_LIMIT_DELAY = 6.0  # 6 seconds between calls (conservative to avoid 429s)
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/chat")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral:7b-instruct")
 
 # Batch size: number of verses per API call
 BATCH_SIZE = 5
@@ -139,6 +141,27 @@ OUTPUT FORMAT:
 VERSES:
 {verse_block}"""
 
+# ---------------------------------------------------------------------------
+# LLM Providers (Groq & Ollama)
+# ---------------------------------------------------------------------------
+
+def call_llm(prompt: str, engine: str, fallback: bool = False) -> Optional[str]:
+    """Call the specified LLM engine with optional fallback."""
+    if engine == "groq":
+        # First attempt with Groq
+        res = call_groq(prompt)
+        if res:
+            return res
+        
+        # If Groq failed and fallback is enabled, try Ollama
+        if fallback:
+            logger.info("   🔄 Groq failed/rate-limited. Falling back to local Ollama...")
+            return call_ollama(prompt)
+    else:
+        # Default to Ollama if requested
+        return call_ollama(prompt)
+    
+    return None
 
 # ---------------------------------------------------------------------------
 # Groq API
@@ -178,23 +201,63 @@ def call_groq(prompt: str, retries: int = 3) -> Optional[str]:
                 return data["choices"][0]["message"]["content"]
         except urllib.error.HTTPError as e:
             if e.code == 429:
-                wait = min(30, 5 * (attempt + 1))
-                logger.warning("Rate limited, waiting %ds...", wait)
+                wait = min(60, 10 * (attempt + 1))
+                logger.warning("   ⚠️ Groq rate limited (429), waiting %ds...", wait)
                 time.sleep(wait)
                 continue
             elif e.code == 503:
-                logger.warning("Groq overloaded, waiting 10s...")
-                time.sleep(10)
+                logger.warning("   ⚠️ Groq overloaded (503), waiting 15s...")
+                time.sleep(15)
                 continue
             else:
-                logger.error("Groq HTTP %d: %s", e.code, e.read().decode()[:200])
+                logger.error("   ❌ Groq HTTP Error %d", e.code)
                 return None
+        except urllib.error.URLError as e:
+            # Handle DNS / Connection issues (Errno 8, etc.)
+            wait = min(60, 15 * (attempt + 1))
+            logger.warning("   📡 Network error (DNS/Connection): %s. Retrying in %ds...", e.reason, wait)
+            time.sleep(wait)
+            continue
         except Exception as e:
-            logger.warning("Groq attempt %d failed: %s", attempt + 1, e)
+            logger.warning("   ⚠️ Groq attempt %d failed: %s", attempt + 1, e)
             if attempt < retries - 1:
-                time.sleep(3)
+                time.sleep(5)
             continue
 
+    return None
+
+
+def call_ollama(prompt: str, retries: int = 3) -> Optional[str]:
+    """Call local Ollama API."""
+    data = {
+        "model": OLLAMA_MODEL,
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ],
+        "stream": False,
+        "options": {
+            "temperature": 0.2,
+        }
+    }
+
+    req = urllib.request.Request(
+        OLLAMA_URL,
+        data=json.dumps(data).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST"
+    )
+
+    for attempt in range(retries):
+        try:
+            with urllib.request.urlopen(req, timeout=300) as resp:
+                result = json.loads(resp.read().decode("utf-8"))
+                return result.get("message", {}).get("content")
+        except Exception as e:
+            logger.warning("Ollama attempt %d failed: %s", attempt + 1, e)
+            if attempt < retries - 1:
+                time.sleep(5)
+            continue
     return None
 
 
@@ -405,6 +468,7 @@ def run_pipeline(
     work: Optional[str] = None,
     limit: int = 0,
     lang_codes: Optional[List[str]] = None,
+    fallback: bool = False,
 ):
     """Run the batch translation pipeline."""
     if not GROQ_API_KEY and not dry_run:
@@ -415,7 +479,15 @@ def run_pipeline(
         lang_codes = ["hi", "en"]
 
     db = SessionLocal()
-    model_name = f"groq-{GROQ_MODEL}"
+    
+    # Determine which engine to use
+    engine = os.getenv("TRANSLATION_ENGINE", "groq").lower()
+    if engine == "ollama":
+        model_name = f"ollama-{OLLAMA_MODEL}"
+        delay = 0.5
+    else:
+        model_name = f"groq-{GROQ_MODEL}"
+        delay = RATE_LIMIT_DELAY
 
     try:
         # Step 1: Scan DB
@@ -471,11 +543,11 @@ def run_pipeline(
             else:
                 prompt = build_translation_prompt(batch)
 
-            # Call Groq
-            raw = call_groq(prompt)
+            # Call LLM with fallback
+            raw = call_llm(prompt, engine, fallback)
             if not raw:
                 total_failed += len(batch)
-                logger.warning("   ❌ Batch %d failed (no response)", batch_num)
+                logger.warning("   ❌ Batch %d failed (no response from any provider)", batch_num)
                 continue
 
             # Parse response
@@ -504,7 +576,7 @@ def run_pipeline(
                         total_failed += len(batch)
 
             # Rate limiting
-            time.sleep(RATE_LIMIT_DELAY)
+            time.sleep(delay)
 
         # Summary
         elapsed_total = time.time() - start_time
@@ -534,7 +606,12 @@ def main():
     parser.add_argument("--work", type=str, help="Translate only this work (e.g., 'Ramayana')")
     parser.add_argument("--limit", type=int, default=0, help="Max verses to process (0 = all)")
     parser.add_argument("--lang", type=str, help="Language code(s), comma-separated (e.g., 'hi,en')")
+    parser.add_argument("--engine", type=str, choices=["groq", "ollama"], help="Translation engine to use")
+    parser.add_argument("--fallback", action="store_true", help="Automatically fallback to Ollama if Groq fails")
     args = parser.parse_args()
+
+    if args.engine:
+        os.environ["TRANSLATION_ENGINE"] = args.engine
 
     lang_codes = None
     if args.lang:
@@ -545,6 +622,7 @@ def main():
         work=args.work,
         limit=args.limit,
         lang_codes=lang_codes,
+        fallback=args.fallback,
     )
 
 

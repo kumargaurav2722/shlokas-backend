@@ -1,0 +1,24 @@
+2026-04-12 12:30:03,973 INFO 🔍 Scanning database for missing translations...
+2026-04-12 12:30:27,414 INFO 📊 Found 61770 verses needing translation:
+2026-04-12 12:30:27,441 INFO    itihasa/Ramayana: 15060
+2026-04-12 12:30:27,441 INFO    itihasa/Ramcharitmanas: 4489
+2026-04-12 12:30:27,441 INFO    purana/Bhagavata Purana: 9074
+2026-04-12 12:30:27,441 INFO    purana/Garuda Purana: 3
+2026-04-12 12:30:27,442 INFO    purana/Markandeya Purana: 3
+2026-04-12 12:30:27,442 INFO    purana/Shiva Purana: 4297
+2026-04-12 12:30:27,442 INFO    purana/Vishnu Purana: 6279
+2026-04-12 12:30:27,442 INFO    upanishad/Upanishads: 4753
+2026-04-12 12:30:27,442 INFO    veda/Atharvaveda: 6563
+2026-04-12 12:30:27,442 INFO    veda/Rigveda: 11097
+2026-04-12 12:30:27,442 INFO    veda/Yajurveda: 152
+2026-04-12 12:30:27,443 INFO 🚀 Starting translation (12354 batches of 5)...
+2026-04-12 12:30:27,443 INFO 📝 Batch 1/12354 (5 verses) | Saved: 0 | Failed: 0 | ETA: 206m
+2026-04-12 12:34:36,005 INFO 📝 Batch 2/12354 (5 verses) | Saved: 0 | Failed: 0 | ETA: 25585m
+2026-04-12 12:39:36,092 WARNING Ollama attempt 1 failed: timed out
+2026-04-12 12:44:41,769 WARNING Ollama attempt 2 failed: timed out
+2026-04-12 12:49:47,010 WARNING Ollama attempt 3 failed: timed out
+2026-04-12 12:49:47,078 WARNING    ❌ Batch 2 failed (no response)
+2026-04-12 12:49:47,096 INFO 📝 Batch 3/12354 (5 verses) | Saved: 0 | Failed: 5 | ETA: 79572m
+2026-04-12 12:54:47,416 WARNING Ollama attempt 1 failed: timed out
+-12 12:52:06,117 WARNING Ollama attempt 1 failed: timed out
+2026-04-12 12:57:11,269 WARNING Ollama attempt 2 failed: timed out

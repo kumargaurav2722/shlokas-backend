@@ -1,0 +1,240 @@
+2026-04-12 12:05:55,733 INFO 🔍 Scanning database for missing translations...
+2026-04-12 12:06:17,480 INFO 📊 Found 62199 verses needing translation:
+2026-04-12 12:06:17,481 INFO    itihasa/Ramayana: 15484
+2026-04-12 12:06:17,481 INFO    itihasa/Ramcharitmanas: 4494
+2026-04-12 12:06:17,481 INFO    purana/Bhagavata Purana: 9074
+2026-04-12 12:06:17,481 INFO    purana/Garuda Purana: 3
+2026-04-12 12:06:17,481 INFO    purana/Markandeya Purana: 3
+2026-04-12 12:06:17,481 INFO    purana/Shiva Purana: 4297
+2026-04-12 12:06:17,481 INFO    purana/Vishnu Purana: 6279
+2026-04-12 12:06:17,481 INFO    upanishad/Upanishads: 4753
+2026-04-12 12:06:17,481 INFO    veda/Atharvaveda: 6563
+2026-04-12 12:06:17,481 INFO    veda/Rigveda: 11097
+2026-04-12 12:06:17,481 INFO    veda/Yajurveda: 152
+2026-04-12 12:06:17,481 INFO 🚀 Starting translation (12440 batches of 5)...
+2026-04-12 12:06:17,481 INFO 📝 Batch 1/12440 (5 verses) | Saved: 0 | Failed: 0 | ETA: 207m
+2026-04-12 12:06:21,921 INFO    ✅ Saved 9 translations
+2026-04-12 12:06:27,924 INFO 📝 Batch 2/12440 (5 verses) | Saved: 9 | Failed: 0 | ETA: 1082m
+2026-04-12 12:06:27,990 WARNING Rate limited, waiting 5s...
+2026-04-12 12:06:39,493 INFO    ✅ Saved 9 translations
+2026-04-12 12:06:45,498 INFO 📝 Batch 3/12440 (5 verses) | Saved: 18 | Failed: 0 | ETA: 1936m
+2026-04-12 12:06:45,557 WARNING Rate limited, waiting 5s...
+2026-04-12 12:06:50,629 WARNING Rate limited, waiting 10s...
+2026-04-12 12:07:00,697 WARNING Rate limited, waiting 15s...
+2026-04-12 12:07:15,705 WARNING    ❌ Batch 3 failed (no response)
+2026-04-12 12:07:15,706 INFO 📝 Batch 4/12440 (5 verses) | Saved: 18 | Failed: 5 | ETA: 3017m
+2026-04-12 12:07:21,162 INFO    ✅ Saved 10 translations
+2026-04-12 12:07:27,165 INFO 📝 Batch 5/12440 (5 verses) | Saved: 28 | Failed: 5 | ETA: 2888m
+2026-04-12 12:07:27,230 WARNING Rate limited, waiting 5s...
+2026-04-12 12:07:38,154 INFO    ✅ Saved 10 translations
+2026-04-12 12:07:44,159 INFO 📝 Batch 6/12440 (5 verses) | Saved: 38 | Failed: 5 | ETA: 2994m
+2026-04-12 12:07:44,219 WARNING Rate limited, waiting 5s...
+2026-04-12 12:07:54,762 INFO    ✅ Saved 10 translations
+2026-04-12 12:08:00,767 INFO 📝 Batch 7/12440 (5 verses) | Saved: 48 | Failed: 5 | ETA: 3058m
+2026-04-12 12:08:13,087 INFO    ✅ Saved 10 translations
+2026-04-12 12:08:19,091 INFO 📝 Batch 8/12440 (5 verses) | Saved: 58 | Failed: 5 | ETA: 3150m
+2026-04-12 12:08:25,829 INFO    ✅ Saved 10 translations
+2026-04-12 12:08:31,830 INFO 📝 Batch 9/12440 (5 verses) | Saved: 68 | Failed: 5 | ETA: 3093m
+2026-04-12 12:08:38,110 INFO    ✅ Saved 10 translations
+2026-04-12 12:08:44,113 INFO 📝 Batch 10/12440 (5 verses) | Saved: 78 | Failed: 5 | ETA: 3038m
+2026-04-12 12:08:49,481 INFO    ✅ Saved 9 translations
+2026-04-12 12:08:55,487 INFO 📝 Batch 11/12440 (5 verses) | Saved: 87 | Failed: 5 | ETA: 2976m
+2026-04-12 12:09:01,608 INFO    ✅ Saved 10 translations
+2026-04-12 12:09:07,613 INFO 📝 Batch 12/12440 (5 verses) | Saved: 97 | Failed: 5 | ETA: 2937m
+2026-04-12 12:09:13,690 ERROR DB commit failed: (psycopg2.errors.ForeignKeyViolation) insert or update on table "translations" violates foreign key constraint "translations_text_id_fkey"
+DETAIL:  Key (text_id)=(abeece8cb-9766-4ace-b6fc-648fea1a2539) is not present in table "texts".
+
+[SQL: INSERT INTO translations (id, text_id, language, translation, commentary, generated_by) VALUES (%(id__0)s, %(text_id__0)s, %(language__0)s, %(translation__0)s, %(commentary__0)s, %(generated_by__0)s), (%(id__1)s, %(text_id__1)s, %(language__1)s, %(tr ... 803 characters truncated ... d__9)s, %(text_id__9)s, %(language__9)s, %(translation__9)s, %(commentary__9)s, %(generated_by__9)s)]
+[parameters: {'generated_by__0': 'groq-llama-3.1-8b-instant', 'translation__0': 'विभीषण के वचन सुनकर रामजी ने मन में सारी बात देख ली और फिर दृढ़ पराक्रम के साथ कहा,', 'commentary__0': None, 'id__0': '658e8043-ef5b-4424-9b65-4d7aab90553e', 'language__0': 'Hindi', 'text_id__0': 'abeece8cb-9766-4ace-b6fc-648fea1a2539', 'generated_by__1': 'groq-llama-3.1-8b-instant', 'translation__1': 'Having heard the words of Vibhishana, Rama, with firm valour, having mentally observed all this, spoke as follows.', 'commentary__1': None, 'id__1': 'caa44703-296b-40c6-8f62-900c93e8b061', 'language__1': 'English', 'text_id__1': 'abeece8cb-9766-4ace-b6fc-648fea1a2539', 'generated_by__2': 'groq-llama-3.1-8b-instant', 'translation__2': 'मेरे पुत्र से क्या लेना देना है, राज्य से क्या लेना देना है, और अपने से क्या लेना देना है? यह तो महाबली सिंह में भी अपने भाई में ही नाश होता है', 'commentary__2': None, 'id__2': '2794d360-5de0-4ac3-bd9e-66a8b16a6295', 'language__2': 'Hindi', 'text_id__2': '5ab2db81-a339-488e-9aaf-a6f8970e84c9', 'generated_by__3': 'groq-llama-3.1-8b-instant', 'translation__3': 'What is to be done with my son? What with the kingdom? What with myself? Even in a great lion, brotherly love is lost.', 'commentary__3': None, 'id__3': '8aca9296-a9dd-4ae8-82c3-ff2238096523', 'language__3': 'English', 'text_id__3': '5ab2db81-a339-488e-9aaf-a6f8970e84c9', 'generated_by__4': 'groq-llama-3.1-8b-instant', 'translation__4': 'रामजी ने सोचकर यह स्थान तय किया कि वह तुम्हारा मित्र बनकर काम करेंगे, और वे बड़े भयंकर वध से भी बचना चाहते थे, इसलिए वे तुम्हें महान पुरुष मानते हैं', 'commentary__4': None, 'id__4': '45ccbd80-a8c4-447b-92a3-c72ed6b64d39', 'language__4': 'Hindi', 'text_id__4': '99c6c8dc-7972-4a62-a11f-62e03593c2a0', 'generated_by__5': 'groq-llama-3.1-8b-instant', 'translation__5': 'Rama, having thought, made a plan to become your friend and do work, and not wanting a terrible killing, therefore considers you a great hero.', 'commentary__5': None, 'id__5': 'e0b8c33c-4b2a-453c-8873-8c9137f770c4', 'language__5': 'English', 'text_id__5': '99c6c8dc-7972-4a62-a11f-62e03593c2a0', 'generated_by__6': 'groq-llama-3.1-8b-instant', 'translation__6': 'वज्र को छोड़ देना चाहिए और अन्तक को भी छोड़ देना चाहिए, क्योंकि भगवान श्री राम ने ऐसा किया है और वे लोकनाथ हैं', 'commentary__6': None, 'id__6': '840bd3d3-ed36-4bc5-9f1f-dabc68a1d788', 'language__6': 'Hindi', 'text_id__6': 'c30d86c6-f484-4dc8-8e5f-0f43ac0edb03', 'generated_by__7': 'groq-llama-3.1-8b-instant', 'translation__7': 'One should abandon the thunderbolt and the destroyer, for Raghava, the Lord of the people, has abandoned them.', 'commentary__7': None, 'id__7': '5a82b221-3fc4-44ae-9831-d29bb96835d7', 'language__7': 'English', 'text_id__7': 'c30d86c6-f484-4dc8-8e5f-0f43ac0edb03', 'generated_by__8': 'groq-llama-3.1-8b-instant', 'translation__8': 'वे क्रोधित नहीं होते हैं और क्रोध के काम को भी नहीं करते हैं, वे क्रोधित लोगों को भी शांति से समझाते हैं और इसलिए वे आज से ही आगे बढ़ जाते हैं', 'commentary__8': None, 'id__8': '753e86bd-6e23-4f91-9c0c-7393b1b4e419', 'language__8': 'Hindi', 'text_id__8': 'ba6ba0eb-a0f1-46ad-b172-698919c4f3c3', 'generated_by__9': 'groq-llama-3.1-8b-instant', 'translation__9': 'He does not get angry and does not do things that provoke anger, and he calms down all those who are angry, and therefore he proceeds from now on.', 'commentary__9': None, 'id__9': 'e2a89a27-2edd-43d1-aad8-d24cd1287bd5', 'language__9': 'English', 'text_id__9': 'ba6ba0eb-a0f1-46ad-b172-698919c4f3c3'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2026-04-12 12:09:19,692 INFO 📝 Batch 13/12440 (5 verses) | Saved: 97 | Failed: 5 | ETA: 2903m
+2026-04-12 12:09:19,762 WARNING Rate limited, waiting 5s...
+2026-04-12 12:09:24,820 WARNING Rate limited, waiting 10s...
+2026-04-12 12:09:36,899 WARNING Rate limited, waiting 15s...
+2026-04-12 12:09:51,906 WARNING    ❌ Batch 13 failed (no response)
+2026-04-12 12:09:51,907 INFO 📝 Batch 14/12440 (5 verses) | Saved: 97 | Failed: 10 | ETA: 3172m
+2026-04-12 12:09:57,720 ERROR DB commit failed: (psycopg2.errors.ForeignKeyViolation) insert or update on table "translations" violates foreign key constraint "translations_text_id_fkey"
+DETAIL:  Key (text_id)=(ceee64e1-5d23-4720-91fd-750119031b4e) is not present in table "texts".
+
+[SQL: INSERT INTO translations (id, text_id, language, translation, commentary, generated_by) VALUES (%(id__0)s, %(text_id__0)s, %(language__0)s, %(translation__0)s, %(commentary__0)s, %(generated_by__0)s), (%(id__1)s, %(text_id__1)s, %(language__1)s, %(tr ... 803 characters truncated ... d__9)s, %(text_id__9)s, %(language__9)s, %(translation__9)s, %(commentary__9)s, %(generated_by__9)s)]
+[parameters: {'generated_by__0': 'groq-llama-3.1-8b-instant', 'translation__0': 'अगर तुम्हारी जीवनशैली और व्यवहार बिना किसी बाधा के होगा, तो वह सुरक्षित होगी। मैं वहां आ जाऊंगा, तुम्हें राम को ले जाने की जरूरत नहीं है।', 'commentary__0': None, 'id__0': '7f132009-aa5e-44bd-9fda-a42583d80b99', 'language__0': 'Hindi', 'text_id__0': '5963979d-2bcd-4e57-9d02-0a98092e5413', 'generated_by__1': 'groq-llama-3.1-8b-instant', 'translation__1': 'If your conduct and behavior are unobstructed, that will be secure. I will go there, you do not need to take Rama.', 'commentary__1': None, 'id__1': '1867f1db-430e-4e27-9691-dbfedf1318c9', 'language__1': 'English', 'text_id__1': '5963979d-2bcd-4e57-9d02-0a98092e5413', 'generated_by__2': 'groq-llama-3.1-8b-instant', 'translation__2': 'मैं थोड़ा बताऊंगा, तुम सुन लेना। अगर तुम सुनोगे, तो बाद में तुम्हारा काम होगा।', 'commentary__2': None, 'id__2': '403aac33-39d7-4f30-9e20-f1ffb89021ec', 'language__2': 'Hindi', 'text_id__2': 'c2a01233-39a3-4cb0-a0fb-e66517e81b55', 'generated_by__3': 'groq-llama-3.1-8b-instant', 'translation__3': 'I will tell you a little, listen to it. If you listen, then your task will be done afterwards.', 'commentary__3': None, 'id__3': '578324a1-280f-4353-9586-542b3f26161e', 'language__3': 'English', 'text_id__3': 'c2a01233-39a3-4cb0-a0fb-e66517e81b55', 'generated_by__4': 'groq-llama-3.1-8b-instant', 'translation__4': 'तुम्हारे आसमान को ढककर दस योजन की दूरी में बल को ढूंढ लो, तुम्हें जल्दी ही उसका तत्व समझ में आएगा।', 'commentary__4': None, 'id__4': '879e1ba1-5eeb-4a7e-82a6-7056a46d0142', 'language__4': 'Hindi', 'text_id__4': '91f9de25-4b24-4ff0-b980-1bb97b6ce4b2', 'generated_by__5': 'groq-llama-3.1-8b-instant', 'translation__5': 'Covering the sky with your strength, search ten yojanas away, you will soon understand its essence.', 'commentary__5': None, 'id__5': 'b63aa85c-d201-4626-b15b-c873be0ded7d', 'language__5': 'English', 'text_id__5': '91f9de25-4b24-4ff0-b980-1bb97b6ce4b2', 'generated_by__6': 'groq-llama-3.1-8b-instant', 'translation__6': 'जिसके कारण तीनों लोक भयभीत हो जाते हैं, वह राक्षस राजा कैसे स्वयं जीवित रह सकता है?', 'commentary__6': None, 'id__6': '34dacf78-e8f4-4e9b-abfd-81aaf916b74a', 'language__6': 'Hindi', 'text_id__6': 'b1dde96f-592d-4904-8544-e83a3c374f67', 'generated_by__7': 'groq-llama-3.1-8b-instant', 'translation__7': 'How can the demon king, whose presence causes the three worlds to flee in fear, survive himself?', 'commentary__7': None, 'id__7': '775dba9f-23cf-4fa5-b941-880fefa5ed0e', 'language__7': 'English', 'text_id__7': 'b1dde96f-592d-4904-8544-e83a3c374f67', 'generated_by__8': 'groq-llama-3.1-8b-instant', 'translation__8': 'तुम्हारे द्वारा सीता को छीन लिया गया है, लेकिन तुम्हें महाबली महात्मा राम का वास्तविक स्वरूप नहीं समझ में आ रहा है।', 'commentary__8': None, 'id__8': '5dec9ab2-8679-435c-a81e-580566077bfd', 'language__8': 'Hindi', 'text_id__8': 'ceee64e1-5d23-4720-91fd-750119031b4e', 'generated_by__9': 'groq-llama-3.1-8b-instant', 'translation__9': 'Sita has been taken by you, but you do not understand the true nature of the mighty and great soul Rama.', 'commentary__9': None, 'id__9': 'dcb6094e-f7ee-4adb-9204-f7213e41afa7', 'language__9': 'English', 'text_id__9': 'ceee64e1-5d23-4720-91fd-750119031b4e'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2026-04-12 12:10:03,720 INFO 📝 Batch 15/12440 (5 verses) | Saved: 97 | Failed: 10 | ETA: 3123m
+2026-04-12 12:10:10,452 INFO    ✅ Saved 10 translations
+2026-04-12 12:10:16,457 INFO 📝 Batch 16/12440 (5 verses) | Saved: 107 | Failed: 10 | ETA: 3093m
+2026-04-12 12:10:22,555 INFO    ✅ Saved 10 translations
+2026-04-12 12:10:28,559 INFO 📝 Batch 17/12440 (5 verses) | Saved: 117 | Failed: 10 | ETA: 3058m
+2026-04-12 12:10:39,656 INFO    ✅ Saved 8 translations
+2026-04-12 12:10:45,661 INFO 📝 Batch 18/12440 (5 verses) | Saved: 125 | Failed: 10 | ETA: 3085m
+2026-04-12 12:10:45,735 WARNING Rate limited, waiting 5s...
+2026-04-12 12:10:50,801 WARNING Rate limited, waiting 10s...
+2026-04-12 12:11:01,875 WARNING Rate limited, waiting 15s...
+2026-04-12 12:11:16,879 WARNING    ❌ Batch 18 failed (no response)
+2026-04-12 12:11:16,880 INFO 📝 Batch 19/12440 (5 verses) | Saved: 125 | Failed: 15 | ETA: 3262m
+2026-04-12 12:11:22,049 INFO    ✅ Saved 8 translations
+2026-04-12 12:11:28,050 INFO 📝 Batch 20/12440 (5 verses) | Saved: 133 | Failed: 15 | ETA: 3214m
+2026-04-12 12:11:28,113 WARNING Rate limited, waiting 5s...
+2026-04-12 12:11:38,638 INFO    ✅ Saved 10 translations
+2026-04-12 12:11:44,644 INFO 📝 Batch 21/12440 (5 verses) | Saved: 143 | Failed: 15 | ETA: 3225m
+2026-04-12 12:11:44,720 WARNING Rate limited, waiting 5s...
+2026-04-12 12:11:49,784 WARNING Rate limited, waiting 10s...
+2026-04-12 12:12:06,183 INFO    ✅ Saved 10 translations
+2026-04-12 12:12:12,189 INFO 📝 Batch 22/12440 (5 verses) | Saved: 153 | Failed: 15 | ETA: 3337m
+2026-04-12 12:12:18,163 INFO    ✅ Saved 10 translations
+2026-04-12 12:12:24,169 INFO 📝 Batch 23/12440 (5 verses) | Saved: 163 | Failed: 15 | ETA: 3299m
+2026-04-12 12:12:39,202 INFO    ✅ Saved 10 translations
+2026-04-12 12:12:45,210 INFO 📝 Batch 24/12440 (5 verses) | Saved: 173 | Failed: 15 | ETA: 3343m
+2026-04-12 12:12:50,506 INFO    ✅ Saved 10 translations
+2026-04-12 12:12:56,508 INFO 📝 Batch 25/12440 (5 verses) | Saved: 183 | Failed: 15 | ETA: 3303m
+2026-04-12 12:13:01,122 INFO    ✅ Saved 10 translations
+2026-04-12 12:13:07,126 INFO 📝 Batch 26/12440 (5 verses) | Saved: 193 | Failed: 15 | ETA: 3260m
+2026-04-12 12:13:13,771 INFO    ✅ Saved 10 translations
+2026-04-12 12:13:19,776 INFO 📝 Batch 27/12440 (5 verses) | Saved: 203 | Failed: 15 | ETA: 3236m
+2026-04-12 12:13:26,571 INFO    ✅ Saved 10 translations
+2026-04-12 12:13:32,575 INFO 📝 Batch 28/12440 (5 verses) | Saved: 213 | Failed: 15 | ETA: 3215m
+2026-04-12 12:13:38,244 INFO    ✅ Saved 10 translations
+2026-04-12 12:13:44,246 INFO 📝 Batch 29/12440 (5 verses) | Saved: 223 | Failed: 15 | ETA: 3187m
+2026-04-12 12:13:50,990 INFO    ✅ Saved 10 translations
+2026-04-12 12:13:56,995 INFO 📝 Batch 30/12440 (5 verses) | Saved: 233 | Failed: 15 | ETA: 3168m
+2026-04-12 12:14:10,088 INFO    ✅ Saved 2 translations
+2026-04-12 12:14:16,092 INFO 📝 Batch 31/12440 (5 verses) | Saved: 235 | Failed: 15 | ETA: 3193m
+2026-04-12 12:14:21,886 INFO    ✅ Saved 10 translations
+2026-04-12 12:14:27,888 INFO 📝 Batch 32/12440 (5 verses) | Saved: 245 | Failed: 15 | ETA: 3169m
+2026-04-12 12:14:33,686 INFO    ✅ Saved 10 translations
+2026-04-12 12:14:39,692 INFO 📝 Batch 33/12440 (5 verses) | Saved: 255 | Failed: 15 | ETA: 3147m
+2026-04-12 12:14:39,765 WARNING Rate limited, waiting 5s...
+2026-04-12 12:14:50,231 INFO    ✅ Saved 10 translations
+2026-04-12 12:14:56,233 INFO 📝 Batch 34/12440 (5 verses) | Saved: 265 | Failed: 15 | ETA: 3155m
+2026-04-12 12:15:02,308 INFO    ✅ Saved 10 translations
+2026-04-12 12:15:08,309 INFO 📝 Batch 35/12440 (5 verses) | Saved: 275 | Failed: 15 | ETA: 3136m
+2026-04-12 12:15:08,380 WARNING Rate limited, waiting 5s...
+2026-04-12 12:15:13,469 WARNING Rate limited, waiting 10s...
+2026-04-12 12:15:23,535 WARNING Rate limited, waiting 15s...
+2026-04-12 12:15:38,546 WARNING    ❌ Batch 35 failed (no response)
+2026-04-12 12:15:38,547 INFO 📝 Batch 36/12440 (5 verses) | Saved: 275 | Failed: 20 | ETA: 3222m
+2026-04-12 12:15:45,936 INFO    ✅ Saved 10 translations
+2026-04-12 12:15:51,940 INFO 📝 Batch 37/12440 (5 verses) | Saved: 285 | Failed: 20 | ETA: 3209m
+2026-04-12 12:15:57,402 INFO    ✅ Saved 10 translations
+2026-04-12 12:16:03,403 INFO 📝 Batch 38/12440 (5 verses) | Saved: 295 | Failed: 20 | ETA: 3187m
+2026-04-12 12:16:03,471 WARNING Rate limited, waiting 5s...
+2026-04-12 12:16:13,526 INFO    ✅ Saved 10 translations
+2026-04-12 12:16:19,530 INFO 📝 Batch 39/12440 (5 verses) | Saved: 305 | Failed: 20 | ETA: 3191m
+2026-04-12 12:16:24,745 INFO    ✅ Saved 10 translations
+2026-04-12 12:16:30,748 INFO 📝 Batch 40/12440 (5 verses) | Saved: 315 | Failed: 20 | ETA: 3169m
+2026-04-12 12:16:35,803 INFO    ✅ Saved 10 translations
+2026-04-12 12:16:41,809 INFO 📝 Batch 41/12440 (5 verses) | Saved: 325 | Failed: 20 | ETA: 3147m
+2026-04-12 12:16:47,075 INFO    ✅ Saved 10 translations
+2026-04-12 12:16:53,080 INFO 📝 Batch 42/12440 (5 verses) | Saved: 335 | Failed: 20 | ETA: 3127m
+2026-04-12 12:16:59,611 INFO    ✅ Saved 10 translations
+2026-04-12 12:17:05,617 INFO 📝 Batch 43/12440 (5 verses) | Saved: 345 | Failed: 20 | ETA: 3114m
+2026-04-12 12:17:13,794 INFO    ✅ Saved 10 translations
+2026-04-12 12:17:19,800 INFO 📝 Batch 44/12440 (5 verses) | Saved: 355 | Failed: 20 | ETA: 3110m
+2026-04-12 12:17:26,435 INFO    ✅ Saved 10 translations
+2026-04-12 12:17:32,438 INFO 📝 Batch 45/12440 (5 verses) | Saved: 365 | Failed: 20 | ETA: 3099m
+2026-04-12 12:17:32,503 WARNING Rate limited, waiting 5s...
+2026-04-12 12:17:37,568 WARNING Rate limited, waiting 10s...
+2026-04-12 12:17:54,446 INFO    ✅ Saved 10 translations
+2026-04-12 12:18:00,448 INFO 📝 Batch 46/12440 (5 verses) | Saved: 375 | Failed: 20 | ETA: 3157m
+2026-04-12 12:18:06,836 INFO    ✅ Saved 10 translations
+2026-04-12 12:18:12,837 INFO 📝 Batch 47/12440 (5 verses) | Saved: 385 | Failed: 20 | ETA: 3144m
+2026-04-12 12:18:18,408 INFO    ✅ Saved 10 translations
+2026-04-12 12:18:24,414 INFO 📝 Batch 48/12440 (5 verses) | Saved: 395 | Failed: 20 | ETA: 3128m
+2026-04-12 12:18:33,919 INFO    ✅ Saved 10 translations
+2026-04-12 12:18:39,924 INFO 📝 Batch 49/12440 (5 verses) | Saved: 405 | Failed: 20 | ETA: 3129m
+2026-04-12 12:18:45,180 INFO    ✅ Saved 10 translations
+2026-04-12 12:18:51,185 INFO 📝 Batch 50/12440 (5 verses) | Saved: 415 | Failed: 20 | ETA: 3113m
+2026-04-12 12:18:51,259 WARNING Rate limited, waiting 5s...
+2026-04-12 12:18:56,331 WARNING Rate limited, waiting 10s...
+2026-04-12 12:19:12,114 INFO    ✅ Saved 10 translations
+2026-04-12 12:19:18,120 INFO 📝 Batch 51/12440 (5 verses) | Saved: 425 | Failed: 20 | ETA: 3161m
+2026-04-12 12:19:23,840 INFO    ✅ Saved 10 translations
+2026-04-12 12:19:29,846 INFO 📝 Batch 52/12440 (5 verses) | Saved: 435 | Failed: 20 | ETA: 3146m
+2026-04-12 12:19:36,332 INFO    ✅ Saved 10 translations
+2026-04-12 12:19:42,335 INFO 📝 Batch 53/12440 (5 verses) | Saved: 445 | Failed: 20 | ETA: 3135m
+2026-04-12 12:19:48,463 INFO    ✅ Saved 10 translations
+2026-04-12 12:19:54,468 INFO 📝 Batch 54/12440 (5 verses) | Saved: 455 | Failed: 20 | ETA: 3123m
+2026-04-12 12:20:08,519 INFO    ✅ Saved 10 translations
+2026-04-12 12:20:14,524 INFO 📝 Batch 55/12440 (5 verses) | Saved: 465 | Failed: 20 | ETA: 3141m
+2026-04-12 12:20:14,614 WARNING Rate limited, waiting 5s...
+2026-04-12 12:20:19,691 WARNING Rate limited, waiting 10s...
+2026-04-12 12:20:29,764 WARNING Rate limited, waiting 15s...
+2026-04-12 12:20:44,771 WARNING    ❌ Batch 55 failed (no response)
+2026-04-12 12:20:44,771 INFO 📝 Batch 56/12440 (5 verses) | Saved: 465 | Failed: 25 | ETA: 3197m
+2026-04-12 12:20:51,644 INFO    ✅ Saved 10 translations
+2026-04-12 12:20:57,646 INFO 📝 Batch 57/12440 (5 verses) | Saved: 475 | Failed: 25 | ETA: 3187m
+2026-04-12 12:21:03,372 INFO    ✅ Saved 10 translations
+2026-04-12 12:21:09,372 INFO 📝 Batch 58/12440 (5 verses) | Saved: 485 | Failed: 25 | ETA: 3173m
+2026-04-12 12:21:15,966 INFO    ✅ Saved 10 translations
+2026-04-12 12:21:21,971 INFO 📝 Batch 59/12440 (5 verses) | Saved: 495 | Failed: 25 | ETA: 3163m
+2026-04-12 12:21:28,148 INFO    ✅ Saved 10 translations
+2026-04-12 12:21:34,151 INFO 📝 Batch 60/12440 (5 verses) | Saved: 505 | Failed: 25 | ETA: 3152m
+2026-04-12 12:21:42,330 INFO    ✅ Saved 10 translations
+2026-04-12 12:21:48,332 INFO 📝 Batch 61/12440 (5 verses) | Saved: 515 | Failed: 25 | ETA: 3148m
+2026-04-12 12:21:54,416 INFO    ✅ Saved 10 translations
+2026-04-12 12:22:00,419 INFO 📝 Batch 62/12440 (5 verses) | Saved: 525 | Failed: 25 | ETA: 3138m
+2026-04-12 12:22:06,652 INFO    ✅ Saved 10 translations
+2026-04-12 12:22:12,658 INFO 📝 Batch 63/12440 (5 verses) | Saved: 535 | Failed: 25 | ETA: 3128m
+2026-04-12 12:22:12,726 WARNING Rate limited, waiting 5s...
+2026-04-12 12:22:24,150 INFO    ✅ Saved 10 translations
+2026-04-12 12:22:30,156 INFO 📝 Batch 64/12440 (5 verses) | Saved: 545 | Failed: 25 | ETA: 3135m
+2026-04-12 12:22:36,350 INFO    ✅ Saved 10 translations
+2026-04-12 12:22:42,354 INFO 📝 Batch 65/12440 (5 verses) | Saved: 555 | Failed: 25 | ETA: 3125m
+2026-04-12 12:22:47,716 INFO    ✅ Saved 10 translations
+2026-04-12 12:22:53,722 INFO 📝 Batch 66/12440 (5 verses) | Saved: 565 | Failed: 25 | ETA: 3113m
+2026-04-12 12:22:59,742 INFO    ✅ Saved 10 translations
+2026-04-12 12:23:05,748 INFO 📝 Batch 67/12440 (5 verses) | Saved: 575 | Failed: 25 | ETA: 3103m
+2026-04-12 12:23:14,609 INFO    ✅ Saved 10 translations
+2026-04-12 12:23:20,610 INFO 📝 Batch 68/12440 (5 verses) | Saved: 585 | Failed: 25 | ETA: 3102m
+2026-04-12 12:23:26,933 INFO    ✅ Saved 10 translations
+2026-04-12 12:23:32,937 INFO 📝 Batch 69/12440 (5 verses) | Saved: 595 | Failed: 25 | ETA: 3094m
+2026-04-12 12:23:45,949 INFO    ✅ Saved 10 translations
+2026-04-12 12:23:51,955 INFO 📝 Batch 70/12440 (5 verses) | Saved: 605 | Failed: 25 | ETA: 3106m
+2026-04-12 12:23:59,133 INFO    ✅ Saved 10 translations
+2026-04-12 12:24:05,138 INFO 📝 Batch 71/12440 (5 verses) | Saved: 615 | Failed: 25 | ETA: 3100m
+2026-04-12 12:24:12,074 INFO    ✅ Saved 10 translations
+2026-04-12 12:24:18,078 INFO 📝 Batch 72/12440 (5 verses) | Saved: 625 | Failed: 25 | ETA: 3094m
+2026-04-12 12:24:23,908 INFO    ✅ Saved 10 translations
+2026-04-12 12:24:29,914 INFO 📝 Batch 73/12440 (5 verses) | Saved: 635 | Failed: 25 | ETA: 3085m
+2026-04-12 12:24:41,679 INFO    ✅ Saved 10 translations
+2026-04-12 12:24:47,683 INFO 📝 Batch 74/12440 (5 verses) | Saved: 645 | Failed: 25 | ETA: 3092m
+2026-04-12 12:24:54,328 INFO    ✅ Saved 10 translations
+2026-04-12 12:25:00,333 INFO 📝 Batch 75/12440 (5 verses) | Saved: 655 | Failed: 25 | ETA: 3085m
+2026-04-12 12:25:06,099 INFO    ✅ Saved 10 translations
+2026-04-12 12:25:12,105 INFO 📝 Batch 76/12440 (5 verses) | Saved: 665 | Failed: 25 | ETA: 3076m
+2026-04-12 12:25:17,728 INFO    ✅ Saved 10 translations
+2026-04-12 12:25:23,733 INFO 📝 Batch 77/12440 (5 verses) | Saved: 675 | Failed: 25 | ETA: 3067m
+2026-04-12 12:25:29,299 INFO    ✅ Saved 10 translations
+2026-04-12 12:25:35,304 INFO 📝 Batch 78/12440 (5 verses) | Saved: 685 | Failed: 25 | ETA: 3058m
+2026-04-12 12:25:40,752 INFO    ✅ Saved 10 translations
+2026-04-12 12:25:46,757 INFO 📝 Batch 79/12440 (5 verses) | Saved: 695 | Failed: 25 | ETA: 3049m
+2026-04-12 12:25:52,160 INFO    ✅ Saved 10 translations
+2026-04-12 12:25:58,166 INFO 📝 Batch 80/12440 (5 verses) | Saved: 705 | Failed: 25 | ETA: 3040m
+2026-04-12 12:26:16,761 INFO    ✅ Saved 10 translations
+2026-04-12 12:26:22,763 INFO 📝 Batch 81/12440 (5 verses) | Saved: 715 | Failed: 25 | ETA: 3065m
+2026-04-12 12:26:28,744 INFO    ✅ Saved 10 translations
+2026-04-12 12:26:34,746 INFO 📝 Batch 82/12440 (5 verses) | Saved: 725 | Failed: 25 | ETA: 3058m
+2026-04-12 12:26:39,698 INFO    ✅ Saved 10 translations
+2026-04-12 12:26:45,704 INFO 📝 Batch 83/12440 (5 verses) | Saved: 735 | Failed: 25 | ETA: 3048m
+2026-04-12 12:26:51,765 INFO    ✅ Saved 10 translations
+2026-04-12 12:26:57,767 INFO 📝 Batch 84/12440 (5 verses) | Saved: 745 | Failed: 25 | ETA: 3041m
+2026-04-12 12:27:04,876 INFO    ✅ Saved 10 translations
+2026-04-12 12:27:10,878 INFO 📝 Batch 85/12440 (5 verses) | Saved: 755 | Failed: 25 | ETA: 3036m
+2026-04-12 12:27:16,101 INFO    ✅ Saved 10 translations
+2026-04-12 12:27:22,102 INFO 📝 Batch 86/12440 (5 verses) | Saved: 765 | Failed: 25 | ETA: 3028m
+2026-04-12 12:27:28,378 INFO    ✅ Saved 10 translations
+2026-04-12 12:27:34,382 INFO 📝 Batch 87/12440 (5 verses) | Saved: 775 | Failed: 25 | ETA: 3022m
+2026-04-12 12:27:46,183 INFO    ✅ Saved 10 translations
+2026-04-12 12:27:52,185 INFO 📝 Batch 88/12440 (5 verses) | Saved: 785 | Failed: 25 | ETA: 3029m
+2026-04-12 12:27:58,083 INFO    ✅ Saved 10 translations
+2026-04-12 12:28:04,086 INFO 📝 Batch 89/12440 (5 verses) | Saved: 795 | Failed: 25 | ETA: 3022m
+2026-04-12 12:28:09,859 INFO    ✅ Saved 10 translations
+2026-04-12 12:28:15,862 INFO 📝 Batch 90/12440 (5 verses) | Saved: 805 | Failed: 25 | ETA: 3015m
+2026-04-12 12:28:21,635 INFO    ✅ Saved 10 translations
+2026-04-12 12:28:27,635 INFO 📝 Batch 91/12440 (5 verses) | Saved: 815 | Failed: 25 | ETA: 3008m
+2026-04-12 12:28:27,704 WARNING Rate limited, waiting 5s...
+2026-04-12 12:28:37,610 INFO    ✅ Saved 10 translations
+2026-04-12 12:28:43,614 INFO 📝 Batch 92/12440 (5 verses) | Saved: 825 | Failed: 25 | ETA: 3011m
+2026-04-12 12:28:49,084 INFO    ✅ Saved 10 translations
+2026-04-12 12:28:55,086 INFO 📝 Batch 93/12440 (5 verses) | Saved: 835 | Failed: 25 | ETA: 3004m
+2026-04-12 12:29:11,200 INFO    ✅ Saved 10 translations
+2026-04-12 12:29:17,201 INFO 📝 Batch 94/12440 (5 verses) | Saved: 845 | Failed: 25 | ETA: 3020m

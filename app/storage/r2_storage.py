@@ -25,15 +25,27 @@ logger = logging.getLogger(__name__)
 R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID", "")
 R2_SECRET_ACCESS_KEY = os.getenv("R2_SECRET_ACCESS_KEY", "")
 R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID", "")
+R2_S3_ENDPOINT = os.getenv("R2_S3_ENDPOINT", "")  # full endpoint URL (alternative to R2_ACCOUNT_ID)
 R2_BUCKET_NAME = os.getenv("R2_BUCKET_NAME", "shlokas-audio")
-R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL", "")  # e.g. https://pub-xxx.r2.dev
+# Public CDN URL — try R2_PUBLIC_URL first, then AUDIO_PUBLIC_BASE_URL
+R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL") or os.getenv("AUDIO_PUBLIC_BASE_URL", "")
 
 _client = None
 
 
+def _get_endpoint_url() -> str:
+    """Resolve the R2 S3-compatible endpoint URL."""
+    if R2_S3_ENDPOINT:
+        return R2_S3_ENDPOINT
+    if R2_ACCOUNT_ID:
+        return f"https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+    raise RuntimeError("Neither R2_S3_ENDPOINT nor R2_ACCOUNT_ID is set.")
+
+
 def is_configured() -> bool:
     """Check if R2 credentials are available."""
-    return bool(R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY and R2_ACCOUNT_ID)
+    has_endpoint = bool(R2_S3_ENDPOINT or R2_ACCOUNT_ID)
+    return bool(R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY and has_endpoint)
 
 
 def _get_client():
@@ -42,11 +54,14 @@ def _get_client():
     if _client is not None:
         return _client
     if not is_configured():
-        raise RuntimeError("Cloudflare R2 credentials not configured. Set R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ACCOUNT_ID env vars.")
+        raise RuntimeError(
+            "Cloudflare R2 credentials not configured. "
+            "Set R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and either R2_ACCOUNT_ID or R2_S3_ENDPOINT."
+        )
     import boto3
     _client = boto3.client(
         "s3",
-        endpoint_url=f"https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com",
+        endpoint_url=_get_endpoint_url(),
         aws_access_key_id=R2_ACCESS_KEY_ID,
         aws_secret_access_key=R2_SECRET_ACCESS_KEY,
         region_name="auto",
@@ -56,7 +71,12 @@ def _get_client():
 
 def get_public_url(r2_key: str) -> str:
     """Get the public CDN URL for an R2 object."""
-    base = R2_PUBLIC_URL.rstrip("/") if R2_PUBLIC_URL else f"https://{R2_BUCKET_NAME}.{R2_ACCOUNT_ID}.r2.dev"
+    if R2_PUBLIC_URL:
+        base = R2_PUBLIC_URL.rstrip("/")
+    elif R2_ACCOUNT_ID:
+        base = f"https://{R2_BUCKET_NAME}.{R2_ACCOUNT_ID}.r2.dev"
+    else:
+        raise RuntimeError("No public URL configured. Set R2_PUBLIC_URL or AUDIO_PUBLIC_BASE_URL.")
     return f"{base}/{r2_key}"
 
 
